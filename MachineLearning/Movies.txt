@@ -1,0 +1,24 @@
+title:Inception
+genre:Action
+year:2010
+rating:8.8
+
+title:The Shawshank Redemption
+genre:Drama
+year:2010
+rating:9.3
+
+title:Mission Impossible 6
+genre:Action
+year:2023
+rating:8.2
+
+title:Se7en
+genre:Thriller
+year:2000
+rating:9.7
+
+title:Tenet
+genre:Sci-Fi
+year:2020
+rating:8.1
