@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Know AI Interaction</title>
+    <style>
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #1e1e1e;
+            color: #ffffff;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+            background: #2e2e2e;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        input,
+        select,
+        button {
+            padding: 10px;
+            margin: 10px;
+            border-radius: 5px;
+            border: none;
+            font-size: 16px;
+            color: #000000;
+        }
+
+        button {
+            background-color: #6200ea;
+            color: #ffffff;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #3700b3;
+        }
+
+        #response {
+            color: #ffffff;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            line-height: 1.5;
+            text-align: left;
+            white-space: pre-wrap;
+            overflow: hidden;
+            border-right: 0.15em solid orange;
+            width: 100%;
+            animation: typing 3.5s steps(40, end), blink 0.75s step-end infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome To Know AI</h1>
+        <p>Select A Dimension</p>
+        <select id="dimension">
+            <option value="">Select...</option>
+            <option value="P">Chance And Prediction</option>
+            <option value="E">Entertainment</option>
+        </select>
+        <div id="dimensionOptions" style="display:none;">
+            <p>Select A Key:</p>
+            <select id="key">
+                <option value="">Select...</option>
+            </select>
+        </div>
+        <div id="mediaChoice" style="display: none;">
+            <input type="text" id="mediaInput" placeholder="Enter Your Choice" />
+        </div>
+        <button onclick="submit()">Submit</button>
+        <div id="response"></div>
+    </div>
+    <script>
+        const dimensionSelect = document.getElementById('dimension');
+        const keySelect = document.getElementById('key');
+        const dimensionOptions = document.getElementById('dimensionOptions');
+        const mediaChoice = document.getElementById('mediaChoice');
+
+        dimensionSelect.addEventListener('change', function () {
+            const dimension = this.value;
+            let options = '<option value="">Select...</option>';
+            if (dimension === 'P') {
+                options += '<option value="W">Weather</option><option value="T">Traffic</option><option value="L">Land</option>';
+                mediaChoice.style.display = 'none';
+            } else if (dimension === 'E') {
+                options += '<option value="M">Movies</option><option value="S">Songs</option>';
+                mediaChoice.style.display = 'block';
+            }
+            keySelect.innerHTML = options;
+            dimensionOptions.style.display = 'block';
+        });
+
+        async function submit() {
+            const dimension = dimensionSelect.value;
+            const key = keySelect.value;
+            const mediaInput = document.getElementById('mediaInput').value;
+
+            const responseDiv = document.getElementById('response');
+            responseDiv.innerHTML = "Loading...";
+
+            const data = { dimension, key, mediaInput };
+            try {
+                const response = await fetch('/dimension', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                console.log('Response:', result); // Debugging log
+
+                responseDiv.innerHTML = formatResponse(result, dimension);
+            } catch (error) {
+                console.error('Error:', error);
+                responseDiv.innerHTML = `Error: ${error.message}`;
+            }
+        }
+
+        function formatResponse(result, dimension) {
+            let formattedResponse = '';
+            if (dimension === 'E') {
+                formattedResponse += `Selected Media: ${result.selectedMedia.title}\n`;
+                formattedResponse += `Genre: ${result.selectedMedia.genre}\n`;
+                formattedResponse += `Year: ${result.selectedMedia.year}\n`;
+                formattedResponse += `Rating: ${result.selectedMedia.rating}\n\n`;
+                formattedResponse += `Recommendations:\n`;
+                result.recommendations.forEach((recommendation, index) => {
+                    formattedResponse += `${index + 1}. ${recommendation.title} (${recommendation.year}) - Rating: ${recommendation.rating}\n`;
+                });
+            } else if (dimension === 'P') {
+                formattedResponse += `Prediction: ${result.prediction}\n`;
+                formattedResponse += `Most Influential Feature: ${result.explanation.mostInfluentialFeature}\n`;
+                formattedResponse += `Contribution: ${result.explanation.contribution}\n`;
+            }
+            return formattedResponse;
+        }
+    </script>
+</body>
+</html>
