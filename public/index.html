@@ -16,7 +16,7 @@
 
         body {
             font-family: 'Arial', sans-serif;
-            background: #1e1e1e;
+            background: black;
             color: #ffffff;
             margin: 0;
             display: flex;
@@ -31,6 +31,7 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: background 0.5s;
         }
 
         input,
@@ -43,7 +44,7 @@
             font-size: 16px;
             color: #000000;
         }
-
+        
         button {
             background-color: #6200ea;
             color: #ffffff;
@@ -67,10 +68,20 @@
             width: 100%;
             animation: typing 3.5s steps(40, end), blink 0.75s step-end infinite;
         }
+
+        .movie-cover {
+            max-width: 100px;
+            margin: 10px;
+        }
+
+        .prediction-image {
+            max-width: 100px;
+            margin: 10px;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container" id="container">
         <h1>Welcome To Know AI</h1>
         <p>Select A Dimension</p>
         <select id="dimension">
@@ -95,6 +106,18 @@
         const keySelect = document.getElementById('key');
         const dimensionOptions = document.getElementById('dimensionOptions');
         const mediaChoice = document.getElementById('mediaChoice');
+        const container = document.getElementById('container');
+
+        const dimensionColors = {
+            "P": "#3e8e41",
+            "E": "#ff8c00"
+        };
+
+        const predictionImages = {
+            "W": "weather.jpg",
+            "T": "traffic.jpg",
+            "L": "land.jpg"
+        };
 
         dimensionSelect.addEventListener('change', function () {
             const dimension = this.value;
@@ -108,6 +131,7 @@
             }
             keySelect.innerHTML = options;
             dimensionOptions.style.display = 'block';
+            container.style.backgroundColor = dimensionColors[dimension] || '#2e2e2e';
         });
 
         async function submit() {
@@ -135,25 +159,28 @@
                 const result = await response.json();
                 console.log('Response:', result); // Debugging log
 
-                responseDiv.innerHTML = formatResponse(result, dimension);
+                responseDiv.innerHTML = formatResponse(result, dimension, key);
             } catch (error) {
                 console.error('Error:', error);
                 responseDiv.innerHTML = `Error: ${error.message}`;
             }
         }
 
-        function formatResponse(result, dimension) {
+        function formatResponse(result, dimension, key) {
             let formattedResponse = '';
             if (dimension === 'E') {
+                formattedResponse += `<img src="${result.selectedMedia.cover}" class="movie-cover" alt="Movie Cover">\n`;
                 formattedResponse += `Selected Media: ${result.selectedMedia.title}\n`;
                 formattedResponse += `Genre: ${result.selectedMedia.genre}\n`;
                 formattedResponse += `Year: ${result.selectedMedia.year}\n`;
                 formattedResponse += `Rating: ${result.selectedMedia.rating}\n\n`;
                 formattedResponse += `Recommendations:\n`;
                 result.recommendations.forEach((recommendation, index) => {
+                    formattedResponse += `<img src="${recommendation.cover}" class="movie-cover" alt="Recommendation Cover">\n`;
                     formattedResponse += `${index + 1}. ${recommendation.title} (${recommendation.year}) - Rating: ${recommendation.rating}\n`;
                 });
             } else if (dimension === 'P') {
+                formattedResponse += `<img src="${predictionImages[key]}" class="prediction-image" alt="Prediction Image">\n`;
                 formattedResponse += `Prediction: ${result.prediction}\n`;
                 formattedResponse += `Most Influential Feature: ${result.explanation.mostInfluentialFeature}\n`;
                 formattedResponse += `Contribution: ${result.explanation.contribution}\n`;
